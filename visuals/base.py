@@ -12,9 +12,9 @@ SVG = """
 """
 
 COMMAND="""
-panel serve script.py --autoreload --show
+$ panel serve script.py --autoreload --show
 
-Panel app running at: http://localhost:5006/panel
+Panel app running at: http://localhost:5006/script
 """
 
 class CodeTyper(pn.viewable.Viewer):
@@ -54,7 +54,7 @@ body {{
                 pn.Column(self._terminal,background="#25282c", margin=0),
                 margin=(50, 150),
             ),
-            background=ACCENT_BASE_COLOR,
+            background=self.accent_base_color,
         )
 
         chars = list(self.value)
