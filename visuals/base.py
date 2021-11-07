@@ -19,6 +19,7 @@ Panel app running at: http://localhost:5006/script
 
 class CodeTyper(pn.viewable.Viewer):
     value = param.String()
+    file_name = param.String("script.py")
     title = param.String()
     command = param.String(default=COMMAND)
     language = param.String(default="python")
@@ -29,7 +30,10 @@ class CodeTyper(pn.viewable.Viewer):
 
     def __init__(self, **params):
         if "value" in params and isinstance(params["value"], pathlib.Path):
-            params["value"]=params["value"].read_text()
+            path = params["value"]
+            params["value"]=path.read_text()
+            params["file_name"]=path.name
+            params["command"]=COMMAND.replace("script", path.name.replace('.py',''))
 
         super().__init__(**params)
 
@@ -42,13 +46,15 @@ body {{
 """
         self._style = pn.pane.HTML("<style>" + raw_css + "</style>", height=0, width=0, margin=0)
         self._ace = pn.widgets.Ace(language=self.language, theme=self.theme, height=self.height, margin=0)
-        self._terminal = pn.pane.Markdown("$ ", margin=(0,25), background="#25282c", style={"color": "white"}, height=75)
+
+        terminal_height = self.command.count('\n')*int(50.0/2.0)
+        self._terminal = pn.pane.Markdown("$ ", margin=(0,25), background="#25282c", style={"color": "white"}, height=terminal_height)
         self._layout = pn.Column(
             pn.Column(
                 self._style,
                 pn.pane.Markdown(self.title, style={"color": "white"}),
                 pn.Row(pn.pane.SVG(SVG, margin=7), pn.Spacer(), background="#25282c", height=30, margin=0),
-                pn.pane.Markdown("&nbsp; &nbsp; `script.py`", background="#25282c", margin=0, style={"color": "white"}),
+                pn.pane.Markdown(f"&nbsp; &nbsp; `{self.file_name}`", background="#25282c", margin=0, style={"color": "white"}),
                 self._ace,
                 pn.Row(pn.Spacer()),
                 pn.Column(self._terminal,background="#25282c", margin=0),
